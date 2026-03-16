@@ -1,2 +1,21 @@
+<<<<<<< HEAD
 # ExamenIIParcialArquitectura
 Examen II parcial usando Django, psutil, python, docker
+=======
+--Monitor de Sistema
+
+Aplicacion Django que muestra en tiempo real el estado del sistema (CPU, RAM y disco) usando la librería externa psutil
+
+--Instalacion de dependencias
+
+1. Crear y activar un entorno virtual. el proyecto se llama "monitor", para activar el entorno virtual ejecutar el comando en la terminal "python -m venv venv" y luego venv\Scripts\Activate
+2. Ejecutar "pip install -r requirements.txt" para instalar Django y "psutil".
+
+-- Ejecución local
+
+1. Asegurarse de estar en la carpeta raíz del proyecto "Monitor".
+2. Ejecuta "python manage.py migrate" 
+3. Levanta el servidor con "python manage.py runserver"
+4. Accede a "http://127.0.0.1:8000" para ver los datos del sistema.
+
+>>>>>>> 2be0c71 (subiendo examen)

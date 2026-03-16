@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitoreo del Sistema</title>
+  <style>
+    :root {
+      --canvas: #242cc9;
+      --card: rgba(30, 202, 113, 0.671);
+      --glow: #e9e9e9;
+      --accent: #ff895d;
+      --text: #131313;
+      --muted: #000000;
+      font-family: 'Space Grotesk', 'Trebuchet MS', 'Segoe UI', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 20%, rgba(61, 219, 243, 0.15), transparent 35%),
+        radial-gradient(circle at 80% 0%, rgba(255, 137, 93, 0.25), transparent 40%),
+        linear-gradient(135deg, #ffffff, #f1f1f3 60%, #f4f4f4);
+      color: var(--text);
+    }
+
+    main {
+      padding: 2.5rem 5vw 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    p.meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .controls button {
+      background: #1b95dc;
+      border: 1px solid rgba(13, 14, 14, 0.5);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.5rem 1.35rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .controls button:hover {
+      border-color: var(--glow);
+      transform: translateY(-1px);
+    }
+
+    .chip {
+      border-radius: 1rem;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .chip.success {
+      background: rgba(61, 219, 243, 0.15);
+      border-color: rgba(61, 219, 243, 0.4);
+    }
+
+    .chip.warning {
+      background: rgba(255, 137, 93, 0.17);
+      border-color: rgba(255, 137, 93, 0.5);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      padding: 1.5rem;
+      border-radius: 1.25rem;
+      background: var(--card);
+      border: 1px solid rgba(16, 121, 44, 0.676);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(5, 5, 20, 0.5);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(61, 219, 243, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+
+    .card h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .metric {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin: 0.5rem 0;
+    }
+
+    .metric small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.95rem;
+      letter-spacing: 0;
+    }
+
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.45rem;
+      font-size: 0.95rem;
+    }
+
+    .list li {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .list li span:first-child {
+      color: var(--text);
+    }
+
+    .alerts {
+      margin-bottom: 1rem;
+      padding: 0.9rem 1.25rem;
+      border-radius: 0.9rem;
+      background: rgba(255, 137, 93, 0.12);
+      border: 1px solid rgba(255, 137, 93, 0.4);
+      color: #ffbeab;
+      font-size: 0.95rem;
+    }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 2rem 1.5rem 3rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Monitoreo del Sistema</h1>
+      </div>
+      <div class="controls">
+        <button type="button" onclick="location.reload()">Actualizar</button>
+
+        <span class="chip" style="border-width: 0;">
+          Auto refresco en <span id="countdown-timer" data-seconds="{{ auto_refresh_seconds }}">{{ auto_refresh_seconds
+            }}</span>s
+        </span>
+      </div>
+    </header>
+
+    {% if errors %}
+    <div class="alerts">
+      {% for error in errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="grid">
+      <article class="card">
+        <h2>CPU</h2>
+        <p class="metric">{{ cpu.usage|default:'--' }}%<small>Uso promedio</small></p>
+        {% if cpu.error %}
+        <p class="meta">Error: {{ cpu.error }}</p>
+        {% else %}
+        <p class="meta">Núcleos lógicos: {{ cores.logical|default:'--' }} · físicos: {{ cores.physical|default:'--' }}
+        </p>
+        {% endif %}
+      </article>
+
+      <article class="card">
+        <h2>Memoria RAM</h2>
+        <p class="metric">{{ memory.percent|default:'--' }}%<small>Uso actual</small></p>
+        <ul class="list">
+          <li><span>Total</span><span>{{ memory.total|default:'--' }} GB</span></li>
+          <li><span>Usada</span><span>{{ memory.used|default:'--' }} GB</span></li>
+          <li><span>Disponible</span><span>{{ memory.available|default:'--' }} GB</span></li>
+        </ul>
+        {% if memory.error %}
+        <p class="meta">Error: {{ memory.error }}</p>
+        {% endif %}
+      </article>
+
+      <article class="card">
+        <h2>Disco</h2>
+        <p class="metric">{{ disk.percent|default:'--' }}%<small>partición {{ disk.mountpoint }}</small></p>
+        <ul class="list">
+          <li><span>Total</span><span>{{ disk.total|default:'--' }} GB</span></li>
+          <li><span>Usado</span><span>{{ disk.used|default:'--' }} GB</span></li>
+          <li><span>Libre</span><span>{{ disk.free|default:'--' }} GB</span></li>
+        </ul>
+        {% if disk.error %}
+        <p class="meta">Error: {{ disk.error }}</p>
+        {% endif %}
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Información del Sistema</h2>
+      <div class="system-grid">
+        <div>
+          <p class="meta">Sistema Operativo</p>
+          <p>{{ system.os }} {{ system.release }}</p>
+        </div>
+        <div>
+          <p class="meta">Versión</p>
+          <p>{{ system.version }}</p>
+        </div>
+        <div>
+          <p class="meta">Arquitectura</p>
+          <p>{{ system.architecture }}</p>
+        </div>
+        <div>
+          <p class="meta">Nombre del equipo</p>
+          <p>{{ system.node }}</p>
+        </div>
+        <div>
+          <p class="meta">Procesador</p>
+          <p>{{ system.processor }}</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const countdown = document.getElementById('countdown-timer');
+      const seconds = parseInt(countdown ? countdown.dataset.seconds : '30', 10);
+      if (!countdown) {
+        return;
+      }
+      let remaining = seconds;
+      countdown.textContent = remaining;
+      const timer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          window.location.reload();
+          return;
+        }
+        countdown.textContent = remaining;
+      }, 1000);
+    })();
+  </script>
+</body>
+
+</html>
