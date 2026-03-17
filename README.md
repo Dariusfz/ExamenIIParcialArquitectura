@@ -1,6 +1,11 @@
 
 # ExamenIIParcialArquitectura
 Examen II parcial usando Django, psutil, python, docker
+
+INTEGRANTES: 
+Victor Raul Martinez Salazar 202310010415
+Carlos Dario Garcia Villalvir 202210011005
+
 =======
 --Monitor de Sistema
 
